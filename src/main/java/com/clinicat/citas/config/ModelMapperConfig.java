@@ -38,6 +38,7 @@ public class ModelMapperConfig {
             destination.setNombre(source.getNombre());
             destination.setSexo(source.getSexo());
             destination.setDescripcion(source.getDescripcion());
+            destination.setEliminado(source.getEliminado());
 
             // Mapear el propietario (usuario)
             if (source.getUsuario() != null) {
