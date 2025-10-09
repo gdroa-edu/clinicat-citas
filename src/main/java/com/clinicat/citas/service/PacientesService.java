@@ -31,7 +31,8 @@ public class PacientesService {
     public PacienteResponseDTO createPaciente(PacienteRequestDTO pacienteDTO) {
         PacienteEntity entity = modelMapper.map(pacienteDTO, PacienteEntity.class);
         entity.setEliminado(false);
-        return modelMapper.map(pacientesRepository.save(entity), PacienteResponseDTO.class);
+        PacienteEntity savedEntity = pacientesRepository.save(entity);
+        return getPacienteById(savedEntity.getId()); // Usar el método que carga las relaciones
     }
 
     public PacienteResponseDTO updatePaciente(Long id, PacienteRequestDTO pacienteDTO) {
@@ -50,7 +51,7 @@ public class PacientesService {
     }
 
     public PacienteResponseDTO getPacienteById(Long id) {
-        return pacientesRepository.findById(id)
+        return pacientesRepository.findByIdWithRelations(id)
                 .map(entity -> modelMapper.map(entity, PacienteResponseDTO.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No se encontró el paciente con id: " + id));
