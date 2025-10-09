@@ -84,6 +84,30 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
+
+		<!-- PostgreSQL -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Local JARs -->
+		<dependency>
+			<groupId>com.clinicat</groupId>
+			<artifactId>commons-entity</artifactId>
+			<version>0.0.2</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/libs/commons-0.0.2-entity.jar</systemPath>
+		</dependency>
+
+        <dependency>
+			<groupId>com.clinicat</groupId>
+            <artifactId>commons-dto</artifactId>
+            <version>0.0.2</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/commons-0.0.2-dto.jar</systemPath>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -91,6 +115,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<includeSystemScope>true</includeSystemScope>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
