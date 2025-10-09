@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PacientesService {
 
     @Value("${app.pagination.page-size}")
@@ -118,6 +120,6 @@ public class PacientesService {
 
         paciente.setEliminado(true);
         pacientesRepository.save(paciente);
+        entityManager.flush();
     }
 }
-
