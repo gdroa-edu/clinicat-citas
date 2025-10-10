@@ -92,27 +92,58 @@ public class CitasService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No se encontró la cita con id: " + id));
 
+        // Actualizar campos principales de la cita
         if (citaDTO.getFechaHora() != null) {
             existingCita.setFechaHora(citaDTO.getFechaHora());
         }
-
         if (citaDTO.getHorarioId() != null) {
             HorarioEntity horario = entityManager.find(HorarioEntity.class, citaDTO.getHorarioId());
             if (horario != null) {
                 existingCita.setHorario(horario);
             }
         }
-
         if (citaDTO.getEstadoId() != null) {
             EstadoCitaEntity estado = estadosCitasRepository.findById(citaDTO.getEstadoId())
-                    .orElse(null);
-            if (estado != null) {
-                existingCita.setEstado(estado);
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Estado no encontrado con ID: " + citaDTO.getEstadoId()));
+            existingCita.setEstado(estado);
+        }
+        if (citaDTO.getVeterinarioId() != null) {
+            UsuarioEntity veterinario = entityManager.find(UsuarioEntity.class, citaDTO.getVeterinarioId());
+            if (veterinario != null) {
+                existingCita.setVeterinario(veterinario);
             }
         }
 
-        citasRepository.save(existingCita);
-        return getCitaById(id);
+        // Eliminar detalles existentes
+        citaDetallesRepository.deleteAllByCitaId(id);
+        entityManager.flush();
+
+        // Crear y guardar nuevos detalles si existen
+        if (citaDTO.getDetalles() != null && !citaDTO.getDetalles().isEmpty()) {
+            List<CitaDetalleEntity> detalles = new ArrayList<>();
+            for (CitaDetalleRequestDTO detalleDTO : citaDTO.getDetalles()) {
+                CitaDetalleEntity detalle = new CitaDetalleEntity();
+                detalle.setCita(existingCita);
+
+                ProductoServicioEntity productoServicio = entityManager.find(ProductoServicioEntity.class, detalleDTO.getServicioId());
+                if (productoServicio == null) {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Servicio no encontrado con ID: " + detalleDTO.getServicioId());
+                }
+                detalle.setServicio(productoServicio);
+                detalle.setDescripcion(detalleDTO.getDescripcion());
+
+                detalles.add(detalle);
+            }
+            citaDetallesRepository.saveAll(detalles);
+        }
+
+        // Guardar la cita actualizada
+        CitaEntity updatedCita = citasRepository.save(existingCita);
+        entityManager.flush();
+
+        return getCitaById(updatedCita.getId());
     }
 
     public CitaResponseDTO getCitaById(Long id) {
