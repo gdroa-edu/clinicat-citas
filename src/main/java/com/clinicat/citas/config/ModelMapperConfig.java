@@ -1,5 +1,6 @@
 package com.clinicat.citas.config;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -17,13 +18,17 @@ import clinicat.commons.entity.PacienteEntity;
 @Configuration
 public class ModelMapperConfig {
 
+
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
+
 
     @Bean
     public ModelMapper modelMapper() {
