@@ -26,6 +26,8 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -160,13 +162,38 @@ public class CitasService {
                 .map(cita -> modelMapper.map(cita, CitaResponseDTO.class));
     }
 
-    public List<CitaResponseDTO> searchCitas(String searchTerm) {
-        List<CitaEntity> citas = citasRepository.findByUsuarioOrFecha(searchTerm);
-
-        if (citas.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron resultados");
+    public List<CitaResponseDTO> searchByFecha(String fechaStr) {
+        LocalDate fecha;
+        try {
+            fecha = LocalDate.parse(fechaStr);
+        } catch (DateTimeParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato de fecha inválido. Use yyyy-MM-dd.");
         }
 
+        List<CitaEntity> citas = citasRepository.findByFecha(fecha);
+        if (citas.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron citas para la fecha: " + fechaStr);
+        }
+        return citas.stream()
+                .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<CitaResponseDTO> searchByPaciente(String nombre) {
+        List<CitaEntity> citas = citasRepository.findByPacienteNombre(nombre);
+        if (citas.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron citas para el paciente: " + nombre);
+        }
+        return citas.stream()
+                .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<CitaResponseDTO> searchByPropietario(String nombre) {
+        List<CitaEntity> citas = citasRepository.findByPropietarioNombre(nombre);
+        if (citas.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron citas para el propietario: " + nombre);
+        }
         return citas.stream()
                 .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
                 .collect(Collectors.toList());

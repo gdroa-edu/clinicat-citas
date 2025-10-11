@@ -50,11 +50,25 @@ public class CitasController {
         return ResponseEntity.ok(citasService.getAllCitas(page));
     }
 
-    @GetMapping("/search/{searchTerm}")
-    @Operation(summary = "Buscar citas por usuario o fecha")
-    @ApiResponse(responseCode = "200", description = "Búsqueda realizada exitosamente")
-    public ResponseEntity<List<CitaResponseDTO>> searchCitas(@PathVariable String searchTerm) {
-        return ResponseEntity.ok(citasService.searchCitas(searchTerm));
+    @GetMapping("/search/fecha/{fecha}")
+    @Operation(summary = "Buscar citas por fecha")
+    @ApiResponse(responseCode = "200", description = "Búsqueda por fecha realizada exitosamente")
+    public ResponseEntity<List<CitaResponseDTO>> searchCitasByFecha(@PathVariable String fecha) {
+        return ResponseEntity.ok(citasService.searchByFecha(fecha));
+    }
+
+    @GetMapping("/search/paciente/{nombre}")
+    @Operation(summary = "Buscar citas por nombre de paciente")
+    @ApiResponse(responseCode = "200", description = "Búsqueda por paciente realizada exitosamente")
+    public ResponseEntity<List<CitaResponseDTO>> searchCitasByPaciente(@PathVariable String nombre) {
+        return ResponseEntity.ok(citasService.searchByPaciente(nombre));
+    }
+
+    @GetMapping("/search/propietario/{nombre}")
+    @Operation(summary = "Buscar citas por nombre de propietario")
+    @ApiResponse(responseCode = "200", description = "Búsqueda por propietario realizada exitosamente")
+    public ResponseEntity<List<CitaResponseDTO>> searchCitasByPropietario(@PathVariable String nombre) {
+        return ResponseEntity.ok(citasService.searchByPropietario(nombre));
     }
 
     @DeleteMapping("/{id}")
@@ -65,4 +79,3 @@ public class CitasController {
         return ResponseEntity.noContent().build();
     }
 }
-
