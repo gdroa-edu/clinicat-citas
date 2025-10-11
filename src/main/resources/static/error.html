@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            max-width: 500px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            color: #ff4b4b;
+            font-size: 2.3rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        img {
+            max-width: 80%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        button {
+            background: #ff4b4b;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #e13e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 75, 75, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>😢 Oops, ha ocurrido un error</h1>
+    <img src="images/error.gif" alt="GIF de error">
+    <p>Algo no salió como esperábamos. Por favor, vuelve a intentarlo más tarde.</p>
+    <button onclick="window.location.href='/'">Volver al inicio</button>
+</div>
+</body>
+</html>

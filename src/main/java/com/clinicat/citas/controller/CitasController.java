@@ -6,6 +6,8 @@ import com.clinicat.citas.service.CitasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,8 @@ import java.util.List;
 @Tag(name = "Citas", description = "API para la gestión de citas")
 public class CitasController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CitasController.class);
+
     @Autowired
     private CitasService citasService;
 
@@ -26,6 +30,7 @@ public class CitasController {
     @Operation(summary = "Crear una nueva cita")
     @ApiResponse(responseCode = "201", description = "Cita creada exitosamente")
     public ResponseEntity<CitaResponseDTO> createCita(@RequestBody CitaRequestDTO citaDTO) {
+        logger.info("Solicitud para crear una nueva cita recibida");
         return new ResponseEntity<>(citasService.createCita(citaDTO), HttpStatus.CREATED);
     }
 
@@ -33,6 +38,7 @@ public class CitasController {
     @Operation(summary = "Modificar una cita existente")
     @ApiResponse(responseCode = "200", description = "Cita actualizada exitosamente")
     public ResponseEntity<CitaResponseDTO> updateCita(@PathVariable Long id, @RequestBody CitaRequestDTO citaDTO) {
+        logger.info("Solicitud para modificar la cita con ID: {}", id);
         return ResponseEntity.ok(citasService.updateCita(id, citaDTO));
     }
 
@@ -40,6 +46,7 @@ public class CitasController {
     @Operation(summary = "Obtener cita por ID")
     @ApiResponse(responseCode = "200", description = "Cita encontrada exitosamente")
     public ResponseEntity<CitaResponseDTO> getCitaById(@PathVariable Long id) {
+        logger.info("Solicitud para obtener la cita con ID: {}", id);
         return ResponseEntity.ok(citasService.getCitaById(id));
     }
 
@@ -47,6 +54,7 @@ public class CitasController {
     @Operation(summary = "Listar citas paginadas")
     @ApiResponse(responseCode = "200", description = "Lista de citas obtenida exitosamente")
     public ResponseEntity<Page<CitaResponseDTO>> getAllCitas(@PathVariable Integer page) {
+        logger.info("Solicitud para obtener la página {} de citas", page);
         return ResponseEntity.ok(citasService.getAllCitas(page));
     }
 
@@ -54,6 +62,7 @@ public class CitasController {
     @Operation(summary = "Buscar citas por fecha")
     @ApiResponse(responseCode = "200", description = "Búsqueda por fecha realizada exitosamente")
     public ResponseEntity<List<CitaResponseDTO>> searchCitasByFecha(@PathVariable String fecha) {
+        logger.info("Solicitud de búsqueda de citas por fecha: {}", fecha);
         return ResponseEntity.ok(citasService.searchByFecha(fecha));
     }
 
@@ -61,6 +70,7 @@ public class CitasController {
     @Operation(summary = "Buscar citas por nombre de paciente")
     @ApiResponse(responseCode = "200", description = "Búsqueda por paciente realizada exitosamente")
     public ResponseEntity<List<CitaResponseDTO>> searchCitasByPaciente(@PathVariable String nombre) {
+        logger.info("Solicitud de búsqueda de citas por nombre de paciente: {}", nombre);
         return ResponseEntity.ok(citasService.searchByPaciente(nombre));
     }
 
@@ -68,6 +78,7 @@ public class CitasController {
     @Operation(summary = "Buscar citas por nombre de propietario")
     @ApiResponse(responseCode = "200", description = "Búsqueda por propietario realizada exitosamente")
     public ResponseEntity<List<CitaResponseDTO>> searchCitasByPropietario(@PathVariable String nombre) {
+        logger.info("Solicitud de búsqueda de citas por nombre de propietario: {}", nombre);
         return ResponseEntity.ok(citasService.searchByPropietario(nombre));
     }
 
@@ -75,6 +86,7 @@ public class CitasController {
     @Operation(summary = "Cancelar una cita (borrado lógico)")
     @ApiResponse(responseCode = "204", description = "Cita cancelada exitosamente")
     public ResponseEntity<Void> cancelarCita(@PathVariable Long id) {
+        logger.info("Solicitud para cancelar la cita con ID: {}", id);
         citasService.cancelarCita(id);
         return ResponseEntity.noContent().build();
     }

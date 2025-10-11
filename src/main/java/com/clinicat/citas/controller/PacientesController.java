@@ -6,6 +6,8 @@ import com.clinicat.citas.service.PacientesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,8 @@ import java.util.List;
 @Tag(name = "Pacientes", description = "API para la gestión de pacientes")
 public class PacientesController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PacientesController.class);
+
     @Autowired
     private PacientesService pacientesService;
 
@@ -26,6 +30,7 @@ public class PacientesController {
     @Operation(summary = "Registrar un nuevo paciente")
     @ApiResponse(responseCode = "201", description = "Paciente creado exitosamente")
     public ResponseEntity<PacienteResponseDTO> createPaciente(@RequestBody PacienteRequestDTO pacienteDTO) {
+        logger.info("Solicitud para registrar un nuevo paciente");
         return new ResponseEntity<>(pacientesService.createPaciente(pacienteDTO), HttpStatus.CREATED);
     }
 
@@ -33,6 +38,7 @@ public class PacientesController {
     @Operation(summary = "Actualizar datos de un paciente")
     @ApiResponse(responseCode = "200", description = "Paciente actualizado exitosamente")
     public ResponseEntity<PacienteResponseDTO> updatePaciente(@PathVariable Long id, @RequestBody PacienteRequestDTO pacienteDTO) {
+        logger.info("Solicitud para actualizar el paciente con ID: {}", id);
         return ResponseEntity.ok(pacientesService.updatePaciente(id, pacienteDTO));
     }
 
@@ -40,6 +46,7 @@ public class PacientesController {
     @Operation(summary = "Obtener paciente por ID")
     @ApiResponse(responseCode = "200", description = "Paciente encontrado exitosamente")
     public ResponseEntity<PacienteResponseDTO> getPacienteById(@PathVariable Long id) {
+        logger.info("Solicitud para obtener el paciente con ID: {}", id);
         return ResponseEntity.ok(pacientesService.getPacienteById(id));
     }
 
@@ -47,6 +54,7 @@ public class PacientesController {
     @Operation(summary = "Listar pacientes paginados")
     @ApiResponse(responseCode = "200", description = "Lista de pacientes obtenida exitosamente")
     public ResponseEntity<Page<PacienteResponseDTO>> getAllPacientes(@PathVariable Integer page) {
+        logger.info("Solicitud para obtener la página {} de pacientes", page);
         return ResponseEntity.ok(pacientesService.getAllPacientes(page));
     }
 
@@ -54,6 +62,7 @@ public class PacientesController {
     @Operation(summary = "Buscar pacientes por nombre o usuario")
     @ApiResponse(responseCode = "200", description = "Búsqueda realizada exitosamente")
     public ResponseEntity<List<PacienteResponseDTO>> searchPacientes(@PathVariable String searchTerm) {
+        logger.info("Solicitud de búsqueda de pacientes por término: {}", searchTerm);
         return ResponseEntity.ok(pacientesService.searchPacientes(searchTerm));
     }
 
@@ -61,6 +70,7 @@ public class PacientesController {
     @Operation(summary = "Realizar borrado lógico de un paciente")
     @ApiResponse(responseCode = "204", description = "Paciente eliminado exitosamente")
     public ResponseEntity<Void> deletePaciente(@PathVariable Long id) {
+        logger.info("Solicitud para eliminar el paciente con ID: {}", id);
         pacientesService.deletePaciente(id);
         return ResponseEntity.noContent().build();
     }
