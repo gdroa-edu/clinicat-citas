@@ -3,6 +3,7 @@ package com.clinicat.citas.controller;
 import clinicat.commons.dto.ProductoServicioDTO;
 import com.clinicat.citas.service.ProductosServiciosService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -10,40 +11,70 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@Tag(name = "ProductosServicios", description = "API para la gestión de productos y servicios que se realizan en la clinica")
+@RequestMapping("/api/productosservicios")
+@Tag(name = "Productos y Servicios", description = "API para la gestión de productos y servicios veterinarios")
 public class ProductoServicioController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ProductoServicioController.class);
+    private static final Logger log = LoggerFactory.getLogger(ProductoServicioController.class);
 
     @Autowired
-    private ProductosServiciosService psService;
+    private ProductosServiciosService productosServiciosService;
 
-    @GetMapping("/api/productosservicios/page/{page}")
-    @Operation(summary = "Obtener todos los productos y servicios")
-    @ApiResponse(responseCode = "200", description = "Lista de productos y servicios obtenida exitosamente")
-    public ResponseEntity<Page<ProductoServicioDTO>> getAllProductosServicios(@PathVariable Integer page){
-        logger.info("Solicitud para obtener la página {} de productos y servicios", page);
-        return ResponseEntity.ok(psService.getAllProductosServicios(page));
+    @GetMapping("/page/{page}")
+    @Operation(summary = "Listar todos los productos y servicios paginados")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
+    @ApiResponse(responseCode = "404", description = "No se encontraron resultados")
+    public ResponseEntity<Page<ProductoServicioDTO>> getAllProductosServicios(@PathVariable Integer page) {
+        return ResponseEntity.ok(productosServiciosService.getAllProductosServicios(page));
     }
 
-    @GetMapping("api/productosservicios/{id}")
-    @Operation(summary = "Obtener producto o servicio por id")
-    @ApiResponse(responseCode = "200", description = "Producto/Servicio obtenido exitosamente")
+    @GetMapping("/{id}")
+    @Operation(summary = "Obtener producto o servicio por ID")
+    @ApiResponse(responseCode = "200", description = "Item encontrado exitosamente")
+    @ApiResponse(responseCode = "404", description = "Item no encontrado")
     public ResponseEntity<ProductoServicioDTO> getProductoServicioById(@PathVariable Long id) {
-        logger.info("Solicitud para obtener el producto/servicio con ID: {}", id);
-        return ResponseEntity.ok(psService.getProductoServicioById(id));
+        return ResponseEntity.ok(productosServiciosService.getProductoServicioById(id));
     }
 
-    @GetMapping("/api/productosservicios/search/{nombre_producto}")
-    public List<ProductoServicioDTO> searchProductosServicios(@PathVariable String nombre_producto) {
-        logger.info("Solicitud de búsqueda de productos/servicios por nombre: {}", nombre_producto);
-        return psService.searchProductosServicios(nombre_producto);
+    @GetMapping("/search/{nombre_producto}")
+    @Operation(summary = "Buscar productos y servicios por nombre")
+    @ApiResponse(responseCode = "200", description = "Búsqueda realizada exitosamente")
+    @ApiResponse(responseCode = "404", description = "No se encontraron resultados")
+    public ResponseEntity<List<ProductoServicioDTO>> searchProductosServicios(@PathVariable String nombre_producto) {
+        return ResponseEntity.ok(productosServiciosService.searchProductosServicios(nombre_producto));
+    }
+
+    @GetMapping("/tipo/{tipo}")
+    @Operation(
+        summary = "Obtener items por tipo",
+        description = "Retorna todos los items de un tipo específico (PRODUCTO o SERVICIO)"
+    )
+    @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente")
+    @ApiResponse(responseCode = "404", description = "No se encontraron resultados")
+    public ResponseEntity<List<ProductoServicioDTO>> getByTipo(
+        @Parameter(description = "Tipo de item (PRODUCTO o SERVICIO)", example = "PRODUCTO")
+        @PathVariable String tipo) {
+        log.info("GET /api/productosservicios/tipo/{}", tipo);
+        return ResponseEntity.ok(productosServiciosService.getByTipo(tipo));
+    }
+
+    @GetMapping("/tipo/{tipo}/search/{nombre}")
+    @Operation(
+        summary = "Buscar items por tipo y nombre",
+        description = "Busca items de un tipo específico que contengan el texto proporcionado en su nombre"
+    )
+    @ApiResponse(responseCode = "200", description = "Búsqueda realizada exitosamente")
+    @ApiResponse(responseCode = "404", description = "No se encontraron resultados")
+    public ResponseEntity<List<ProductoServicioDTO>> searchByTipoAndNombre(
+        @Parameter(description = "Tipo de item (PRODUCTO o SERVICIO)", example = "PRODUCTO")
+        @PathVariable String tipo,
+        @Parameter(description = "Texto a buscar en el nombre", example = "vacuna")
+        @PathVariable String nombre) {
+        log.info("GET /api/productosservicios/tipo/{}/search/{}", tipo, nombre);
+        return ResponseEntity.ok(productosServiciosService.searchByTipoAndNombre(tipo, nombre));
     }
 }
