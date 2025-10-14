@@ -15,4 +15,5 @@ public interface IPacientesRepository extends IBaseRepository<PacienteEntity, Lo
     @Query("SELECT p FROM PacienteEntity p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(p.usuario.nombre) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<PacienteEntity> findByNombreOrUsuarioNombreContaining(@Param("searchTerm") String searchTerm);
 
+    List<PacienteEntity> findByUsuarioId(Long usuarioId);
 }

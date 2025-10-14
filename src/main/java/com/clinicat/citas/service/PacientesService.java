@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class PacientesService {
+    private static final Logger log = LoggerFactory.getLogger(PacientesService.class);
 
     @Value("${app.pagination.page-size}")
     private Integer pageSize;
@@ -121,5 +124,20 @@ public class PacientesService {
         paciente.setEliminado(true);
         pacientesRepository.save(paciente);
         entityManager.flush();
+    }
+
+    public List<PacienteResponseDTO> getPacientesByUsuarioId(Long usuarioId) {
+        log.info("Obteniendo pacientes para el usuario con ID: {}", usuarioId);
+        List<PacienteEntity> pacientes = pacientesRepository.findByUsuarioId(usuarioId);
+
+        if (pacientes.isEmpty()) {
+            log.warn("No se encontraron pacientes para el usuario con ID: {}", usuarioId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "No se encontraron pacientes para el usuario especificado");
+        }
+
+        return pacientes.stream()
+                .map(entity -> modelMapper.map(entity, PacienteResponseDTO.class))
+                .collect(Collectors.toList());
     }
 }

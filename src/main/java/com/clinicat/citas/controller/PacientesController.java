@@ -4,6 +4,7 @@ import clinicat.commons.dto.PacienteRequestDTO;
 import clinicat.commons.dto.PacienteResponseDTO;
 import com.clinicat.citas.service.PacientesService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -73,5 +74,26 @@ public class PacientesController {
         logger.info("Solicitud para eliminar el paciente con ID: {}", id);
         pacientesService.deletePaciente(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    @Operation(
+        summary = "Obtener pacientes por ID de usuario",
+        description = "Retorna todas las mascotas asociadas a un usuario específico",
+        tags = { "Pacientes" }
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de pacientes encontrada exitosamente")
+    @ApiResponse(responseCode = "404", description = "No se encontraron pacientes para el usuario especificado")
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    public ResponseEntity<List<PacienteResponseDTO>> getPacientesByUsuarioId(
+            @Parameter(
+                description = "ID del usuario propietario de las mascotas",
+                required = true,
+                example = "1"
+            )
+            @PathVariable Long usuarioId) {
+        logger.info("GET /api/pacientes/usuario/{}", usuarioId);
+        List<PacienteResponseDTO> pacientes = pacientesService.getPacientesByUsuarioId(usuarioId);
+        return ResponseEntity.ok(pacientes);
     }
 }
