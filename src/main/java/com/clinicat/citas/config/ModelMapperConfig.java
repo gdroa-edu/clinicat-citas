@@ -68,6 +68,14 @@ public class ModelMapperConfig {
         modelMapper.createTypeMap(PacienteEntity.class, PacienteResponseDTO.class)
                 .setConverter(pacienteConverter);
 
+        // Configurar el mapping para CitaDetalleEntity a CitaDetalleResponseDTO
+        modelMapper.emptyTypeMap(clinicat.commons.entity.CitaDetalleEntity.class, clinicat.commons.dto.CitaDetalleResponseDTO.class)
+            .addMappings(mapper -> {
+                mapper.map(clinicat.commons.entity.CitaDetalleEntity::getId, clinicat.commons.dto.CitaDetalleResponseDTO::setId);
+                mapper.map(clinicat.commons.entity.CitaDetalleEntity::getDescripcion, clinicat.commons.dto.CitaDetalleResponseDTO::setDescripcion);
+                mapper.map(clinicat.commons.entity.CitaDetalleEntity::getServicio, clinicat.commons.dto.CitaDetalleResponseDTO::setServicio);
+            });
+
         return modelMapper;
     }
 }

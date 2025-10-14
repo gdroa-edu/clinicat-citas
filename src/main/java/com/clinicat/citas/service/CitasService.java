@@ -1,5 +1,6 @@
 package com.clinicat.citas.service;
 
+import clinicat.commons.dto.CitaDetalleResponseDTO;
 import clinicat.commons.dto.CitaRequestDTO;
 import clinicat.commons.dto.CitaResponseDTO;
 import clinicat.commons.dto.CitaDetalleRequestDTO;
@@ -31,10 +32,13 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class CitasService {
+    private static final Logger log = LoggerFactory.getLogger(CitasService.class);
 
     @Value("${app.pagination.page-size}")
     private Integer pageSize;
@@ -220,5 +224,26 @@ public class CitasService {
         cita.setEstado(estadoCancelada);
         citasRepository.save(cita);
         entityManager.flush();
+    }
+
+    public List<CitaDetalleResponseDTO> getDetallesByCitaId(Long citaId) {
+        log.info("Buscando detalles para la cita ID: {}", citaId);
+
+        // Primero verificamos que la cita exista
+        CitaEntity cita = citasRepository.findById(citaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró la cita con id: " + citaId));
+
+        List<CitaDetalleEntity> detalles = citaDetallesRepository.findByCitaId(citaId);
+
+        if (detalles.isEmpty()) {
+            log.warn("No se encontraron detalles para la cita ID: {}", citaId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No se encontraron detalles para la cita especificada");
+        }
+
+        return detalles.stream()
+                .map(detalle -> modelMapper.map(detalle, CitaDetalleResponseDTO.class))
+                .collect(Collectors.toList());
     }
 }
