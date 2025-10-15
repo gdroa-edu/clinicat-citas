@@ -36,4 +36,12 @@ public interface ICitasRepository extends IBaseRepository<CitaEntity, Long> {
            "WHERE LOWER(v.nombre) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
            "OR LOWER(v.apellido) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     List<CitaEntity> findByVeterinarioNombre(@Param("searchTerm") String searchTerm);
+
+    @Query("SELECT DISTINCT c FROM CitaEntity c " +
+           "LEFT JOIN FETCH c.paciente p " +
+           "LEFT JOIN FETCH c.usuario u " +
+           "LEFT JOIN FETCH c.estado e " +
+           "LEFT JOIN FETCH c.veterinario v " +
+           "WHERE v.id = :veterinarioId")
+    List<CitaEntity> findByVeterinarioId(@Param("veterinarioId") Long veterinarioId);
 }

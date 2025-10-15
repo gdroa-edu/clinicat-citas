@@ -246,4 +246,12 @@ public class CitasService {
                 .map(detalle -> modelMapper.map(detalle, CitaDetalleResponseDTO.class))
                 .collect(Collectors.toList());
     }
+
+    public List<CitaResponseDTO> getCitasByVeterinarioId(Long veterinarioId) {
+        log.info("Buscando citas para el veterinario con ID: {}", veterinarioId);
+        List<CitaEntity> citas = citasRepository.findByVeterinarioId(veterinarioId);
+        return citas.stream()
+                .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
+                .collect(Collectors.toList());
+    }
 }
