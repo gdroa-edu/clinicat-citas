@@ -254,4 +254,24 @@ public class CitasService {
                 .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
                 .collect(Collectors.toList());
     }
+
+    public List<CitaResponseDTO> getCitasByEstadoId(Long estadoId) {
+        log.info("Buscando citas para el estado con ID: {}", estadoId);
+
+        // Verificar que el estado existe
+        EstadoCitaEntity estado = estadosCitasRepository.findById(estadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el estado con id: " + estadoId));
+
+        List<CitaEntity> citas = citasRepository.findByEstadoId(estadoId);
+
+        if (citas.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No se encontraron citas con el estado especificado");
+        }
+
+        return citas.stream()
+                .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
+                .collect(Collectors.toList());
+    }
 }

@@ -44,4 +44,12 @@ public interface ICitasRepository extends IBaseRepository<CitaEntity, Long> {
            "LEFT JOIN FETCH c.veterinario v " +
            "WHERE v.id = :veterinarioId")
     List<CitaEntity> findByVeterinarioId(@Param("veterinarioId") Long veterinarioId);
+
+    @Query("SELECT DISTINCT c FROM CitaEntity c " +
+           "LEFT JOIN FETCH c.paciente p " +
+           "LEFT JOIN FETCH c.usuario u " +
+           "LEFT JOIN FETCH c.estado e " +
+           "LEFT JOIN FETCH c.veterinario v " +
+           "WHERE e.id = :estadoId")
+    List<CitaEntity> findByEstadoId(@Param("estadoId") Long estadoId);
 }
