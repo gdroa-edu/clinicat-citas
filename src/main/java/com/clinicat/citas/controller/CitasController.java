@@ -42,6 +42,14 @@ public class CitasController {
         return ResponseEntity.ok(citasService.updateCita(id, citaDTO));
     }
 
+    @PutMapping("/{id}/estado/{estadoId}")
+    @Operation(summary = "Cambiar el estado de una cita")
+    @ApiResponse(responseCode = "200", description = "Estado de la cita actualizado exitosamente")
+    public ResponseEntity<CitaResponseDTO> changeCitaEstado(@PathVariable Long id, @PathVariable Long estadoId) {
+        logger.info("Solicitud para cambiar estado de la cita ID: {} al estado ID: {}", id, estadoId);
+        return ResponseEntity.ok(citasService.changeCitaEstado(id, estadoId));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener cita por ID")
     @ApiResponse(responseCode = "200", description = "Cita encontrada exitosamente")
