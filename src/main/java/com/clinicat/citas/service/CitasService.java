@@ -7,14 +7,12 @@ import clinicat.commons.dto.CitaDetalleRequestDTO;
 import clinicat.commons.entity.CitaEntity;
 import clinicat.commons.entity.CitaDetalleEntity;
 import clinicat.commons.entity.EstadoCitaEntity;
-import clinicat.commons.entity.PacienteEntity;
 import clinicat.commons.entity.UsuarioEntity;
 import clinicat.commons.entity.HorarioEntity;
 import clinicat.commons.entity.ProductoServicioEntity;
 import com.clinicat.citas.repository.ICitasRepository;
 import com.clinicat.citas.repository.ICitaDetallesRepository;
 import com.clinicat.citas.repository.IEstadosCitasRepository;
-import com.clinicat.citas.repository.IPacientesRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,9 +49,6 @@ public class CitasService {
 
     @Autowired
     private IEstadosCitasRepository estadosCitasRepository;
-
-    @Autowired
-    private IPacientesRepository pacientesRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -226,13 +221,36 @@ public class CitasService {
         entityManager.flush();
     }
 
+    // Agregado: cambiar el estado de una cita a un estado dado y devolver la cita mapeada
+    public CitaResponseDTO changeCitaEstado(Long id, Long estadoId) {
+        // Buscar la cita
+        CitaEntity cita = citasRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró la cita con id: " + id));
+
+        // Buscar el estado destino
+        EstadoCitaEntity nuevoEstado = estadosCitasRepository.findById(estadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el estado con id: " + estadoId));
+
+        // Asignar y guardar
+        cita.setEstado(nuevoEstado);
+        CitaEntity saved = citasRepository.save(cita);
+        entityManager.flush();
+
+        // Devolver la cita mapeada a DTO (usa la lógica existente que trae relaciones)
+        return getCitaById(saved.getId());
+    }
+
     public List<CitaDetalleResponseDTO> getDetallesByCitaId(Long citaId) {
         log.info("Buscando detalles para la cita ID: {}", citaId);
 
-        // Primero verificamos que la cita exista
-        CitaEntity cita = citasRepository.findById(citaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No se encontró la cita con id: " + citaId));
+        // Verificamos que la cita exista usando existsById para evitar la carga innecesaria
+        if (!citasRepository.existsById(citaId)) {
+            log.warn("No se encontró la cita con ID: {}", citaId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No se encontró la cita con id: " + citaId);
+        }
 
         List<CitaDetalleEntity> detalles = citaDetallesRepository.findByCitaId(citaId);
 
@@ -258,8 +276,8 @@ public class CitasService {
     public List<CitaResponseDTO> getCitasByEstadoId(Long estadoId) {
         log.info("Buscando citas para el estado con ID: {}", estadoId);
 
-        // Verificar que el estado existe
-        EstadoCitaEntity estado = estadosCitasRepository.findById(estadoId)
+        // Verificar que el estado existe (lanza 404 si no existe)
+        estadosCitasRepository.findById(estadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No se encontró el estado con id: " + estadoId));
 
