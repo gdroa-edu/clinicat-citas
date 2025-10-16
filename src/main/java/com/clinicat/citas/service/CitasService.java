@@ -7,12 +7,14 @@ import clinicat.commons.dto.CitaDetalleRequestDTO;
 import clinicat.commons.entity.CitaEntity;
 import clinicat.commons.entity.CitaDetalleEntity;
 import clinicat.commons.entity.EstadoCitaEntity;
+import clinicat.commons.entity.PacienteEntity;
 import clinicat.commons.entity.UsuarioEntity;
 import clinicat.commons.entity.HorarioEntity;
 import clinicat.commons.entity.ProductoServicioEntity;
 import com.clinicat.citas.repository.ICitasRepository;
 import com.clinicat.citas.repository.ICitaDetallesRepository;
 import com.clinicat.citas.repository.IEstadosCitasRepository;
+import com.clinicat.citas.repository.IPacientesRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +51,9 @@ public class CitasService {
 
     @Autowired
     private IEstadosCitasRepository estadosCitasRepository;
+
+    @Autowired
+    private IPacientesRepository pacientesRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -147,48 +152,6 @@ public class CitasService {
         return getCitaById(updatedCita.getId());
     }
 
-    public void cancelarCita(Long id) {
-        CitaEntity cita = citasRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No se encontró la cita con id: " + id));
-
-        EstadoCitaEntity estadoCancelada = estadosCitasRepository.findAll().stream()
-                .filter(estado -> {
-                    try {
-                        String nombreEstado = (String) estado.getClass().getMethod("getNombre").invoke(estado);
-                        return nombreEstado != null && nombreEstado.equalsIgnoreCase("cancelada");
-                    } catch (Exception e) {
-                        return false;
-                    }
-                })
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No se encontró el estado 'cancelada'"));
-
-        cita.setEstado(estadoCancelada);
-        citasRepository.save(cita);
-        entityManager.flush();
-    }
-
-    // Nuevo método: cambiar el estado de una cita
-    public CitaResponseDTO changeCitaEstado(Long citaId, Long estadoId) {
-        log.info("Cambiando estado de la cita ID: {} al estado ID: {}", citaId, estadoId);
-
-        CitaEntity cita = citasRepository.findById(citaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No se encontró la cita con id: " + citaId));
-
-        EstadoCitaEntity estado = estadosCitasRepository.findById(estadoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No se encontró el estado con id: " + estadoId));
-
-        cita.setEstado(estado);
-        CitaEntity updated = citasRepository.save(cita);
-        entityManager.flush();
-
-        return modelMapper.map(updated, CitaResponseDTO.class);
-    }
-
     public CitaResponseDTO getCitaById(Long id) {
         CitaEntity cita = citasRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -240,11 +203,34 @@ public class CitasService {
                 .collect(Collectors.toList());
     }
 
+    public void cancelarCita(Long id) {
+        CitaEntity cita = citasRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró la cita con id: " + id));
+
+        EstadoCitaEntity estadoCancelada = estadosCitasRepository.findAll().stream()
+                .filter(estado -> {
+                    try {
+                        String nombreEstado = (String) estado.getClass().getMethod("getNombre").invoke(estado);
+                        return nombreEstado != null && nombreEstado.equalsIgnoreCase("cancelada");
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el estado 'cancelada'"));
+
+        cita.setEstado(estadoCancelada);
+        citasRepository.save(cita);
+        entityManager.flush();
+    }
+
     public List<CitaDetalleResponseDTO> getDetallesByCitaId(Long citaId) {
         log.info("Buscando detalles para la cita ID: {}", citaId);
 
         // Primero verificamos que la cita exista
-        citasRepository.findById(citaId)
+        CitaEntity cita = citasRepository.findById(citaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No se encontró la cita con id: " + citaId));
 
@@ -273,7 +259,7 @@ public class CitasService {
         log.info("Buscando citas para el estado con ID: {}", estadoId);
 
         // Verificar que el estado existe
-        estadosCitasRepository.findById(estadoId)
+        EstadoCitaEntity estado = estadosCitasRepository.findById(estadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No se encontró el estado con id: " + estadoId));
 
