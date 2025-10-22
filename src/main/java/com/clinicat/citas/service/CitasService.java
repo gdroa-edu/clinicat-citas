@@ -10,7 +10,6 @@ import clinicat.commons.entity.EstadoCitaEntity;
 import clinicat.commons.entity.UsuarioEntity;
 import clinicat.commons.entity.HorarioEntity;
 import clinicat.commons.entity.ProductoServicioEntity;
-import com.clinicat.citas.repository.ICitasRepository;
 import com.clinicat.citas.repository.ICitaDetallesRepository;
 import com.clinicat.citas.repository.IEstadosCitasRepository;
 import org.modelmapper.ModelMapper;
@@ -293,3 +292,5 @@ public class CitasService {
                 .collect(Collectors.toList());
     }
 }
+}
+

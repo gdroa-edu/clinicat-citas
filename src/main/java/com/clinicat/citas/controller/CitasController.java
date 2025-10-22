@@ -99,14 +99,6 @@ public class CitasController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/veterinario/{veterinarioId}")
-    @Operation(summary = "Obtener citas por ID de veterinario")
-    @ApiResponse(responseCode = "200", description = "Citas encontradas exitosamente")
-    @ApiResponse(responseCode = "404", description = "No se encontraron citas para el veterinario especificado")
-    public ResponseEntity<List<CitaResponseDTO>> getCitasByVeterinarioId(@PathVariable Long veterinarioId) {
-        logger.info("Solicitud para obtener citas del veterinario con ID: {}", veterinarioId);
-        List<CitaResponseDTO> citas = citasService.getCitasByVeterinarioId(veterinarioId);
-        return ResponseEntity.ok(citas);
     }
 
     @GetMapping("/estado/{estadoId}")
