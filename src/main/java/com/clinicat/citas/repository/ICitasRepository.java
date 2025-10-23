@@ -70,4 +70,15 @@ public interface ICitasRepository extends IBaseRepository<CitaEntity, Long> {
            "c.id",
            countQuery = "SELECT COUNT(c) FROM CitaEntity c")
     Page<CitaEntity> findAllOrderedByEstado(Pageable pageable);
+
+    @Query("SELECT c FROM CitaEntity c " +
+           "LEFT JOIN c.estado e " +
+           "LEFT JOIN c.horario h " +
+           "ORDER BY CASE " +
+           "WHEN LOWER(e.descripcion) LIKE '%pendiente%' THEN 1 " +
+           "WHEN LOWER(e.descripcion) LIKE '%finalizado%' THEN 2 " +
+           "WHEN LOWER(e.descripcion) LIKE '%cancelado%' THEN 3 " +
+           "ELSE 4 END, " +
+           "h.fecha ASC, h.horaInicio ASC, c.id")
+    Page<CitaEntity> findAllSummaryOrderedByEstadoAndHorario(Pageable pageable);
 }

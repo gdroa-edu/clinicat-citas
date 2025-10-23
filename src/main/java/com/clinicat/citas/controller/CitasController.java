@@ -2,6 +2,7 @@ package com.clinicat.citas.controller;
 
 import clinicat.commons.dto.CitaRequestDTO;
 import clinicat.commons.dto.CitaResponseDTO;
+import clinicat.commons.dto.CitaSummaryDTO;
 import com.clinicat.citas.service.CitasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -117,5 +118,13 @@ public class CitasController {
         logger.info("Solicitud para obtener citas con estado ID: {}", estadoId);
         List<CitaResponseDTO> citas = citasService.getCitasByEstadoId(estadoId);
         return ResponseEntity.ok(citas);
+    }
+
+    @GetMapping("/summary/page/{page}")
+    @Operation(summary = "Listar resumen de citas paginadas ordenadas por estado y horario")
+    @ApiResponse(responseCode = "200", description = "Resumen de citas obtenido exitosamente")
+    public ResponseEntity<Page<CitaSummaryDTO>> getAllCitasSummary(@PathVariable Integer page) {
+        logger.info("Solicitud para obtener resumen de citas página: {}", page);
+        return ResponseEntity.ok(citasService.getAllCitasSummary(page));
     }
 }

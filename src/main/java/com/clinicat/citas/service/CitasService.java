@@ -3,6 +3,7 @@ package com.clinicat.citas.service;
 import clinicat.commons.dto.CitaDetalleResponseDTO;
 import clinicat.commons.dto.CitaRequestDTO;
 import clinicat.commons.dto.CitaResponseDTO;
+import clinicat.commons.dto.CitaSummaryDTO;
 import clinicat.commons.dto.CitaDetalleRequestDTO;
 import clinicat.commons.entity.CitaEntity;
 import clinicat.commons.entity.CitaDetalleEntity;
@@ -307,5 +308,60 @@ public class CitasService {
         return citas.stream()
                 .map(cita -> modelMapper.map(cita, CitaResponseDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    public Page<CitaSummaryDTO> getAllCitasSummary(Integer page) {
+        log.info("Obteniendo resumen de citas para la página: {}", page);
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
+        Page<CitaEntity> citasPage = citasRepository.findAllSummaryOrderedByEstadoAndHorario(pageRequest);
+
+        // Mapear las citas a CitaSummaryDTO
+        List<CitaSummaryDTO> citasSummary = citasPage.getContent().stream()
+                .map(this::mapToCitaSummaryDTO)
+                .collect(Collectors.toList());
+
+        return new org.springframework.data.domain.PageImpl<>(
+                citasSummary,
+                pageRequest,
+                citasPage.getTotalElements()
+        );
+    }
+
+    private CitaSummaryDTO mapToCitaSummaryDTO(CitaEntity cita) {
+        CitaSummaryDTO dto = new CitaSummaryDTO();
+        dto.setId(cita.getId());
+        dto.setFechaHora(cita.getFechaHora());
+
+        // Mapear nombre de la mascota (paciente)
+        if (cita.getPaciente() != null) {
+            dto.setNombreMascota(cita.getPaciente().getNombre());
+
+            // Mapear nombre del dueño
+            if (cita.getPaciente().getUsuario() != null) {
+                dto.setNombreDueno(cita.getPaciente().getUsuario().getNombre() + " " +
+                        (cita.getPaciente().getUsuario().getApellido() != null ?
+                                cita.getPaciente().getUsuario().getApellido() : ""));
+            }
+        }
+
+        // Mapear nombre del veterinario
+        if (cita.getVeterinario() != null) {
+            dto.setNombreVeterinario(cita.getVeterinario().getNombre() + " " +
+                    (cita.getVeterinario().getApellido() != null ?
+                            cita.getVeterinario().getApellido() : ""));
+        }
+
+        // Mapear estado
+        if (cita.getEstado() != null) {
+            dto.setEstado(cita.getEstado().getDescripcion());
+        }
+
+        // Obtener el primer servicio de los detalles
+        List<CitaDetalleEntity> detalles = citaDetallesRepository.findByCitaId(cita.getId());
+        if (!detalles.isEmpty() && detalles.get(0).getServicio() != null) {
+            dto.setPrimerServicio(detalles.get(0).getServicio().getNombreProducto());
+        }
+
+        return dto;
     }
 }
