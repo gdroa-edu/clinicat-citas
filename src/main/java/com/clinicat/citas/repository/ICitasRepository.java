@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import clinicat.commons.entity.CitaEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -52,4 +54,20 @@ public interface ICitasRepository extends IBaseRepository<CitaEntity, Long> {
            "LEFT JOIN FETCH c.veterinario v " +
            "WHERE e.id = :estadoId")
     List<CitaEntity> findByEstadoId(@Param("estadoId") Long estadoId);
+
+    @Query(value = "SELECT c FROM CitaEntity c " +
+           "LEFT JOIN c.estado e " +
+           "LEFT JOIN c.horario h " +
+           "ORDER BY CASE " +
+           "WHEN LOWER(e.descripcion) LIKE '%pendiente%' THEN 1 " +
+           "WHEN LOWER(e.descripcion) LIKE '%finalizada%' THEN 2 " +
+           "WHEN LOWER(e.descripcion) LIKE '%cancelada%' THEN 3 " +
+           "ELSE 4 END, " +
+           "CASE WHEN LOWER(e.descripcion) LIKE '%pendiente%' THEN h.fecha END ASC, " +
+           "CASE WHEN LOWER(e.descripcion) LIKE '%pendiente%' THEN c.fechaHora END ASC, " +
+           "CASE WHEN LOWER(e.descripcion) NOT LIKE '%pendiente%' THEN h.fecha END DESC, " +
+           "CASE WHEN LOWER(e.descripcion) NOT LIKE '%pendiente%' THEN c.fechaHora END DESC, " +
+           "c.id",
+           countQuery = "SELECT COUNT(c) FROM CitaEntity c")
+    Page<CitaEntity> findAllOrderedByEstado(Pageable pageable);
 }

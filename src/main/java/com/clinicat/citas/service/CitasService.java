@@ -157,8 +157,24 @@ public class CitasService {
 
     public Page<CitaResponseDTO> getAllCitas(Integer page) {
         PageRequest pageRequest = PageRequest.of(page, pageSize);
-        return citasRepository.findAll(pageRequest)
-                .map(cita -> modelMapper.map(cita, CitaResponseDTO.class));
+        Page<CitaEntity> citasPage = citasRepository.findAllOrderedByEstado(pageRequest);
+
+        // Cargar las relaciones para cada cita
+        List<CitaResponseDTO> citasDTO = citasPage.getContent().stream()
+                .map(cita -> {
+                    // Cargar la cita completa con relaciones
+                    CitaEntity citaCompleta = citasRepository.findByIdWithRelations(cita.getId())
+                            .orElse(cita);
+                    return modelMapper.map(citaCompleta, CitaResponseDTO.class);
+                })
+                .collect(Collectors.toList());
+
+        // Crear una nueva página con los DTOs
+        return new org.springframework.data.domain.PageImpl<>(
+                citasDTO,
+                pageRequest,
+                citasPage.getTotalElements()
+        );
     }
 
     public List<CitaResponseDTO> searchByFecha(String fechaStr) {
